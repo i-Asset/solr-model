@@ -1,6 +1,7 @@
 package at.srfg.indexing.model.asset;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.data.solr.core.mapping.Dynamic;
@@ -14,9 +15,12 @@ import at.srfg.indexing.model.common.PropertyType;
 import at.srfg.indexing.model.party.PartyType;
 import at.srfg.indexing.model.solr.annotation.SolrJoin;
 
-@SolrDocument(collection = "asset")
-public class AssetType extends Concept implements IConcept, ICustomPropertyAware {
-	@Indexed(name="manufacturer_id")
+@SolrDocument(collection = IAssetType.COLLECTION)
+public class AssetType extends Concept implements IAssetType, IConcept, ICustomPropertyAware {
+	@Indexed(name = OPERATOR_ID)
+	@SolrJoin(joinedType = PartyType.class, joinName = {"operator"})
+	private String operatorId;
+	@Indexed(name = MAINTAINER_ID)
 	@SolrJoin(joinedType = PartyType.class, joinName = {"manufacturer"})
 	private String manufacturerId;
 	@Indexed(name=CUSTOM_INTEGER_PROPERTY, type=SOLR_INT)
@@ -45,6 +49,9 @@ public class AssetType extends Concept implements IConcept, ICustomPropertyAware
 	 * @return the customIntValues
 	 */
 	public Map<String, Collection<Integer>> getCustomIntValues() {
+		if ( customIntValues == null) {
+			customIntValues = new HashMap<String, Collection<Integer>>();
+		}
 		return customIntValues;
 	}
 	/**
@@ -57,6 +64,9 @@ public class AssetType extends Concept implements IConcept, ICustomPropertyAware
 	 * @return the customDoubleValues
 	 */
 	public Map<String, Collection<Double>> getCustomDoubleValues() {
+		if ( customDoubleValues == null) {
+			customDoubleValues = new HashMap<String, Collection<Double>>();
+		}
 		return customDoubleValues;
 	}
 	/**
@@ -69,6 +79,9 @@ public class AssetType extends Concept implements IConcept, ICustomPropertyAware
 	 * @return the customStringValues
 	 */
 	public Map<String, Collection<String>> getCustomStringValues() {
+		if ( customStringValues == null) {
+			customStringValues = new HashMap<String, Collection<String>>();
+		}
 		return customStringValues;
 	}
 	/**
@@ -81,6 +94,9 @@ public class AssetType extends Concept implements IConcept, ICustomPropertyAware
 	 * @return the customBooleanValue
 	 */
 	public Map<String, Boolean> getCustomBooleanValue() {
+		if ( customBooleanValue == null) {
+			customBooleanValue = new HashMap<String, Boolean>();
+		}
 		return customBooleanValue;
 	}
 	/**
@@ -93,6 +109,9 @@ public class AssetType extends Concept implements IConcept, ICustomPropertyAware
 	 * @return the customPropertyKeys
 	 */
 	public Map<String, String> getCustomPropertyKeys() {
+		if ( customPropertyKeys == null) {
+			customPropertyKeys = new HashMap<String, String>();
+		}
 		return customPropertyKeys;
 	}
 	/**
@@ -105,6 +124,9 @@ public class AssetType extends Concept implements IConcept, ICustomPropertyAware
 	 * @return the customProperties
 	 */
 	public Map<String, PropertyType> getCustomProperties() {
+		if ( customProperties == null) {
+			customProperties = new HashMap<String, PropertyType>();
+		}
 		return customProperties;
 	}
 	/**

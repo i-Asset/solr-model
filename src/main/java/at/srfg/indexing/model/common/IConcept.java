@@ -84,7 +84,7 @@ public interface IConcept {
 	String NAME_SPACE_FIELD = "nameSpace";
 	/**
 	 * The local name of the current concept, the {@link IConcept#ID_FIELD} is (usually)
-	 * constructed with {@link IConcept#ID_FIELD} + {@link IConcept#LOCAL_NAME_FIELD}
+	 * constructed with {@link IConcept#NAME_SPACE_FIELD} + {@link IConcept#LOCAL_NAME_FIELD}
 	 */
 	String LOCAL_NAME_FIELD = "localName"; 
 	/**

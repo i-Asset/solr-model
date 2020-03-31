@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.annotation.ReadOnlyProperty;
 /**
- * Interface providing the functionality for indexing custom properties.
+ * Interface providing the functionality for indexing arbitrary dynamic properties. A
+ * dynamic property is further qualified by key parts.
+ * 
  * <p>
  * Implementors inherit default functionality for handling dynamic properties
  * 
@@ -23,6 +25,7 @@ import org.springframework.data.annotation.ReadOnlyProperty;
  *
  */
 public interface ICustomPropertyAware {
+	String getUri();
 	/**
 	 * Custom Property Key's including their label used
 	 */
@@ -188,8 +191,11 @@ public interface ICustomPropertyAware {
 
 		return new ArrayList<>();
 	}
-
 	default void addProperty(String value, String ... qualifier) {
+		addProperty(value, null, qualifier);
+	}
+	
+	default void addProperty(String value, PropertyType customMeta, String ... qualifier) {
 		String key = mapDynamicKeyParts(qualifier);
 		
 		Collection<String> values = getCustomStringValues().get(key);
@@ -197,8 +203,13 @@ public interface ICustomPropertyAware {
 			// use a set to avoid duplicates
 			getCustomStringValues().put(key, new HashSet<String>());
 		}
-		// now add the value
+		// now add the value to the double map
 		getCustomStringValues().get(key).add(value);
+		if ( customMeta !=null ) {
+			// handle custom property metadata
+			getCustomProperties().put(key, customMeta);
+		}
+		
 	}
 	/**
 	 * Set a single custom string property

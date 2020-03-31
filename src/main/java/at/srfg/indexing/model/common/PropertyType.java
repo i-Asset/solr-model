@@ -103,6 +103,7 @@ public class PropertyType extends Concept implements IPropertyType {
 		if ( this.conceptClass == null ) {
 			this.conceptClass = new HashSet<>();
 		}
+		this.conceptClass.add(conceptClassUri);
 	}
 	public void setConceptClass(Collection<String> conceptClassUris) {
 		this.conceptClass = conceptClassUris;

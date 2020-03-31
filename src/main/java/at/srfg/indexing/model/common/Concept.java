@@ -127,7 +127,7 @@ public abstract class Concept implements IConcept {
 	public void setLabel(Map<String, String> labelMap) {
 		if ( labelMap != null ) {
 			for ( String key : labelMap.keySet() ) {
-				setLabel(key, labelMap.get(key));
+				setLabel(labelMap.get(key), key);
 			}
 		}
 		else {

@@ -1,20 +1,56 @@
 package at.srfg.indexing.model.common;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.springframework.data.annotation.ReadOnlyProperty;
 
 import com.google.common.base.Strings;
 
+/**
+ * Mixin behaviour for classes wwith references to 
+ * properties
+ * 
+ * @author dglachs
+ *
+ */
 public interface IPropertyAware {
+	
+	public String getUri();
 	@ReadOnlyProperty
 	public Map<String, PropertyType> getPropertyMap();
 	public void setPropertyMap(Map<String, PropertyType> customProperties);
+	public Collection<String> getProperties();
+	/**
+	 * Store the of string properties - implementors
+	 * must take care of duplicates
+	 * @param properties
+	 */
+	public void setProperties(Collection<String> properties);
+	/**
+	 * Maintain the list of uri's pointing to {@link PropertyType}
+	 * elements.
+	 * 
+	 * @param property The uri of the property
+	 */
+	default void addProperty(String property) {
+		if ( getProperties() == null ) {
+			HashSet<String> propSet = new HashSet<String>();
+			propSet.add(property);
+			setProperties(propSet);
+		}
+		else {
+			getProperties().add(property);
+		}
+	}
 	/**
 	 * Convenience method to add a {@link PropertyType} object
 	 * holding complete metadata to an {@link IPropertyAware} 
-	 * object. The provided metadata must provide a {@link PropertyType#getUri()}.
+	 * object. The provided metadata must provide a {@link PropertyType#getUri()} 
+	 * to be added via {@link IPropertyAware#addProperty(String)}.
 	 * @param property The property metadata
 	 */
 	default void addProperty(PropertyType property) {
@@ -24,7 +60,10 @@ public interface IPropertyAware {
 		}
 		// 
 		if (!Strings.isNullOrEmpty(property.getUri())) {
+			// keep the full description to be stored in the index
 			getPropertyMap().put(property.getUri(), property);
+			// maintain the property uri (the link)
+			addProperty(property.getUri());
 		}
 	}
 

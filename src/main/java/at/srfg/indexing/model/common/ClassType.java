@@ -70,21 +70,10 @@ public class ClassType extends Concept implements IClassType, IPropertyAware {
 	 * @return The list of URI's pointing to related propertyIds
 	 */
 	public Collection<String> getProperties() {
-		if (this.properties == null ) {
-			this.properties = new HashSet<>();
-		}
+//		if (this.properties == null ) {
+//			this.properties = new HashSet<>();
+//		}
 		return properties;
-	}
-	/**
-	 * Helper method for adding single propertyIds to the 
-	 * current list
-	 * @param property The URI of a related propery
-	 */
-	public void addProperty(String property) {
-		if (this.properties == null ) {
-			this.properties = new HashSet<>();
-		}
-		this.properties.add(property);
 	}
 	/**
 	 * Setter for the propertyIds
