@@ -85,8 +85,8 @@ public interface IndexingService {
 			@RequestParam(name = "facet.mincount", required = false, defaultValue = "1") 
 			int facetMinCount,
 			@RequestParam(name = "start", required = false, defaultValue = "0") 
-			Integer start,
-			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) throws Exception;
+			int start,
+			@RequestParam(name = "rows", required = false, defaultValue = "10") int rows) throws Exception;
 
 	@RequestMapping(
 			method = RequestMethod.GET, 
@@ -208,8 +208,8 @@ public interface IndexingService {
 			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
 			@RequestParam(name = "facet.limit", required = false, defaultValue = "15") int facetLimit,
 			@RequestParam(name = "facet.mincount", required = false, defaultValue = "1") int facetMinCount,
-			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
-			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows) throws Exception ;
+			@RequestParam(name = "start", required = false, defaultValue = "0") int start,
+			@RequestParam(name = "rows", required = false, defaultValue = "10") int rows) throws Exception ;
 	
 	@RequestMapping(
 			method = RequestMethod.GET, 
@@ -348,8 +348,8 @@ public interface IndexingService {
 			@RequestParam(name = "facet.field", required = false) List<String> facetFields,
 			@RequestParam(name = "facet.limit", required = false, defaultValue = "15") int facetLimit,
 			@RequestParam(name = "facet.mincount", required = false, defaultValue = "1") int facetMinCount,
-			@RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
-			@RequestParam(name = "rows", required = false, defaultValue = "10") Integer rows)throws Exception ;
+			@RequestParam(name = "start", required = false, defaultValue = "0") int start,
+			@RequestParam(name = "rows", required = false, defaultValue = "10") int rows)throws Exception ;
 	
 	
 	@RequestMapping(
