@@ -135,7 +135,7 @@ public abstract class Concept implements IConcept {
 		}
 	}
 	public void setLabel(Locale locale, String label) {
-		setLabel(locale.getLanguage(), locale.getLanguage());
+		setLabel(locale.getLanguage(), label);
 	}
 	/**
 	 * Helper method for adding a multilingual label to the concept. Only one label per language is stored.
