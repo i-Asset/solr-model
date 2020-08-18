@@ -186,6 +186,6 @@ public interface CodedTypeIndexing {
 			notes = "The entry is removed, corresponding links from ClassType are NOT removed!")
 	public boolean deleteCodedType(
 			@ApiParam("The id of the CodedType to remove")
-			@RequestParam(name = "id") String uri) throws Exception ;
+			@RequestParam(name = "id") List<String> uri) throws Exception ;
 
 }

@@ -186,6 +186,8 @@ public interface PropertyTypeIndexing {
 			notes = "The entry is removed, corresponding links from ClassType are NOT removed!")
 	public boolean deletePropertyType(
 			@ApiParam("The id of the property to remove")
-			@RequestParam(name = "id") String uri) throws Exception ;
+			@RequestParam(name = "id") 
+			List<String> uri) throws Exception;			
+//			@RequestParam(name = "id") String uri) throws Exception ;
 
 }

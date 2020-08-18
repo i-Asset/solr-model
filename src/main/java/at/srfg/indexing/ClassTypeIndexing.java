@@ -188,6 +188,6 @@ public interface ClassTypeIndexing {
 			notes = "The entry is removed, corresponding links from PropertyType are also removed!")
 	public boolean deleteClassType(
 			@ApiParam("The id of the concept class to remove")
-			@RequestParam(name = "id") String uri) throws Exception ;
+			@RequestParam(name = "id") List<String> uri) throws Exception ;
 
 }
