@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.springframework.data.annotation.ReadOnlyProperty;
+import org.springframework.data.solr.core.mapping.SolrDocument;
 /**
  * Interface providing the functionality for indexing arbitrary dynamic properties. A
  * dynamic property is further qualified by key parts.
@@ -37,6 +38,18 @@ public interface ICustomPropertyAware {
 	String CUSTOM_DOUBLE_PROPERTY = "*_ds";
 	String CUSTOM_INTEGER_PROPERTY = "*_is";
 	String CUSTOM_BOOLEAN_PROPERTY = "*_b";
+	/**
+	 * Helper method to extract the collection
+	 * @return
+	 */
+	default String getCollection() {
+		SolrDocument solrDocument = getClass().getAnnotation(SolrDocument.class);
+		
+		if ( solrDocument != null && solrDocument.collection() != null) {
+			return solrDocument.collection();
+		}
+		throw new IllegalStateException("No @SolrDocument annotation found ...");
+	}
 	/**
 	 * Manage the Dynamic Key parts and manage the original labeling 
 	 * in {@link ICustomPropertyAware#CUSTOM_KEY_FIELD}
