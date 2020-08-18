@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.springframework.data.annotation.ReadOnlyProperty;
+import org.springframework.data.solr.core.mapping.SolrDocument;
 
 import com.google.common.base.Strings;
 
@@ -62,8 +63,24 @@ public interface IPropertyAware {
 			// keep the full description to be stored in the index
 			getPropertyMap().put(property.getUri(), property);
 			// maintain the property uri (the link)
+			
 			addProperty(property.getUri());
+			// provide the backlink to the issuing IPropertyAware
+			property.addPropertyUsage(getCollection(), getUri());
 		}
 	}
-
+	/**
+	 * Helper method to extract the collection
+	 * @return
+	 */
+	default String getCollection() {
+		SolrDocument solrDocument = getClass().getAnnotation(SolrDocument.class);
+		
+		if ( solrDocument != null && solrDocument.collection() != null) {
+			return solrDocument.collection();
+		}
+		throw new IllegalStateException("No @SolrDocument annotation found ...");
+	}
+	
+	
 }

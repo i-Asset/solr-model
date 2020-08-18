@@ -124,6 +124,31 @@ public class ClassType extends Concept implements IClassType, IPropertyAware {
 		}
 		this.children.add(childClass);
 	}
+	public void removeChild(String childClass) {
+		if (this.children == null ) {
+			this.children = new HashSet<>();
+		}
+		this.children.remove(childClass);
+	}
+	public void removeAllChild(String childClass) {
+		if (this.allChildren == null ) {
+			this.allChildren = new HashSet<>();
+		}
+		this.allChildren.remove(childClass);
+	}
+	public void removeParent(String parentClass) {
+		if (this.parents == null ) {
+			this.parents = new HashSet<>();
+		}
+		this.parents.remove(parentClass);
+	}
+	public void removeAllParent(String childClass) {
+		if (this.allParents == null ) {
+			this.allParents = new HashSet<>();
+		}
+		this.allParents.remove(childClass);
+	}
+
 	/**
 	 * Retrieve the list of all direct sub-classes
 	 * @return
@@ -144,7 +169,7 @@ public class ClassType extends Concept implements IClassType, IPropertyAware {
 		}
 	}
 	/** 
-	 * Helper method for adding a single parent (all uppper levels)
+	 * Helper method for adding a single parent (all upper levels)
 	 * @param superClass
 	 */
 	public void addAllParent(String superClass) {
@@ -159,6 +184,9 @@ public class ClassType extends Concept implements IClassType, IPropertyAware {
 	 * @return
 	 */
 	public Collection<String> getAllParents() {
+		if (this.allParents == null ) {
+			this.allParents = new HashSet<>();
+		}
 		return allParents;
 	}
 	/**

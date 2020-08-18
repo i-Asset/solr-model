@@ -6,27 +6,29 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.data.solr.core.mapping.SolrDocument;
+
+import at.srfg.indexing.model.common.IClassType;
 /**
  * Annotation for specifying joins in the SOLR domain
  * classes. 
  * <p>
  * Example:
  * <pre>
- * <code>@SolrJoin(joinedType=ClassficationClass.class, <i>joinedField="id", joinName={"cc", "classification"}</i>)</code>
- * <code>@Indexed(name="eclass_irdi")</code>
- * <code>private String irdi;</code>
+ * <code>@SolrJoin(joinedType=ClassType.class, <i>joinedField="id", joinName={"class", "classification"}</i>)</code>
+ * <code>@Indexed(name="usage")</code>
+ * <code>private Collection&ltString&gt classUsage;</code>
  * </pre>
  * The <i>mandatory</i> <code><b>joinedType</b></code> points to the domain class annotated with {@link SolrDocument}, 
- * thus providing the name of the joined collection, in this example <code>classification_class</code>.
+ * thus providing the name of the joined collection, in this example {@link IClassType#COLLECTION} (resolves to <code>concept_class</code>).
  * </p><p>
  * The <i>optional</i> <code><b>joinedName</b></code> usually points to the field annotated with <code>@Id</code>, e.g. the 
  * primary id of the collection. If not present, the element is extracted from the <code>joinedType</code>. 
  * </p><p>
  * The <i>optional</i> <code><b>joinName</b></code> provides additional names for use as a join indicator. In the example,
- * the terms <code>cc.codedname:13000000</code>, <code>classification.codedname:13000000</code> 
- * and <code>classification_class.codedname:13000000</code> are equivalent and will resolve to the following join expression:
+ * the terms <code>class.en_label:SOLR*</code>, <code>classification.usage:SOLR*</code> 
+ * and <code>concept_class.usage:SOLR*</code> are equivalent and will resolve to the following join expression:
  * <pre>
- * {!join to=eclass_irdi from=id fromIndex=classification_class}codedname:13*
+ * {!join to=usage from=id fromIndex=concept_class}en_label:SOLR*
  * </pre>
  * If <code>joinName</code> is not provided, only the name of the joined collection is accepted as join indicator.  
  * </p>

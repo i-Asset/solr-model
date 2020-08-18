@@ -1,7 +1,6 @@
 package at.srfg.indexing.model.common;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,6 +16,7 @@ import com.google.common.base.Strings;
  * @author dglachs
  *
  */
+@Deprecated
 public interface IConceptTypeAware<T extends IConcept> {
 	/**
 	 * access the uri

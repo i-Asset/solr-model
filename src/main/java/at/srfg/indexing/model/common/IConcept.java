@@ -140,4 +140,5 @@ public interface IConcept {
 	 * @return
 	 */
 	public String getLocalName();
+	
 }

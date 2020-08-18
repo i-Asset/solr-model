@@ -1,10 +1,14 @@
 package at.srfg.indexing.model.common;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.data.solr.core.mapping.Dynamic;
 import org.springframework.data.solr.core.mapping.Indexed;
 import org.springframework.data.solr.core.mapping.SolrDocument;
 
@@ -37,6 +41,10 @@ public class PropertyType extends Concept implements IPropertyType {
 	@Indexed(required=false, name=CLASSIFICATION_CLASS_FIELD)
 	@SolrJoin(joinedType = ClassType.class)
 	private Collection<String> conceptClass = new HashSet<String>();
+	
+	@Indexed(required=false, type=SOLR_STRING, name=PROPERTY_USAGE_FIELD)
+	@Dynamic
+	private Map<String, Collection<String>> propertyUsage;
 
 	@Indexed(required=false, name=IDX_FIELD_NAME_FIELD)
 	private Collection<String> itemFieldNames = new HashSet<String>();
@@ -114,7 +122,7 @@ public class PropertyType extends Concept implements IPropertyType {
 		}
 		this.conceptClass.remove(conceptClassUri);
 	}
-
+//
 	public String getType() {
 		return type;
 	}
@@ -138,7 +146,9 @@ public class PropertyType extends Concept implements IPropertyType {
 			// ensure to have a new set (to avoid duplicates)
 			itemFieldNames = itemFieldNames.stream().collect(Collectors.toSet());
 		}
-		this.itemFieldNames.add(idxField);
+		if (!Strings.isNotBlank(idxField)) {
+			this.itemFieldNames.add(idxField);
+		}
 	}
 	/**
 	 * Specifies the basic type of the property
@@ -183,5 +193,41 @@ public class PropertyType extends Concept implements IPropertyType {
 
 	public void setCodeListId(String codeListUri) {
 		this.codeListId = codeListUri;
+	}
+	public Map<String, Collection<String>> getPropertyUsage() {
+		return propertyUsage;
+	}
+	public void setPropertyUsage(Map<String, Collection<String>> propertyUsage) {
+		this.propertyUsage = propertyUsage;
+	}
+	public Collection<String> getPropertyUsage(String collection) {
+		if ( propertyUsage == null) {
+			propertyUsage = new HashMap<>();
+		}
+		if ( ! propertyUsage.containsKey(collection)) {
+			propertyUsage.put(collection, new HashSet<String>());
+		}
+		// 
+		return propertyUsage.get(collection);
+	}
+	public boolean removePropertyUsage(String collection, String uri) {
+		if ( propertyUsage == null) {
+			propertyUsage = new HashMap<>();
+		}
+		if ( ! propertyUsage.containsKey(collection)) {
+			propertyUsage.put(collection, new HashSet<String>());
+		}
+		// 
+		return propertyUsage.get(collection).remove(uri);
+	}
+	public boolean addPropertyUsage(String collection, String uri) {
+		if ( propertyUsage == null) {
+			propertyUsage = new HashMap<>();
+		}
+		if ( ! propertyUsage.containsKey(collection)) {
+			propertyUsage.put(collection, new HashSet<String>());
+		}
+		// 
+		return propertyUsage.get(collection).add(uri);
 	}
 }

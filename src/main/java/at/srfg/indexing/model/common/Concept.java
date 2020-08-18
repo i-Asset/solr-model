@@ -127,15 +127,15 @@ public abstract class Concept implements IConcept {
 	public void setLabel(Map<String, String> labelMap) {
 		if ( labelMap != null ) {
 			for ( String key : labelMap.keySet() ) {
-				setLabel(labelMap.get(key), key);
+				setLabel(key, labelMap.get(key));
 			}
 		}
 		else {
 			this.label = null;
 		}
 	}
-	public void setLabel(String label, Locale locale) {
-		setLabel(label, locale.getLanguage());
+	public void setLabel(Locale locale, String label) {
+		setLabel(locale.getLanguage(), locale.getLanguage());
 	}
 	/**
 	 * Helper method for adding a multilingual label to the concept. Only one label per language is stored.
@@ -143,7 +143,7 @@ public abstract class Concept implements IConcept {
 	 * @param language The language code such as <i>en</i>, <i>es</i>
 	 * @param label The respective label
 	 */
-	public void setLabel(String label, String language) {
+	public void setLabel(String language, String label) {
 		if ( this.label == null) {
 			this.label = new HashMap<>();
 		}
@@ -170,7 +170,10 @@ public abstract class Concept implements IConcept {
 		// 
 		addLanguage(language);
 	}
-	public void addHiddenLabel(String hidden, Locale locale) {
+	public void addAlternateLabel(Locale locale, String alternate) {
+		addHiddenLabel(locale.getLanguage(),alternate);
+	}
+	public void addHiddenLabel(Locale locale, String hidden) {
 		addHiddenLabel(locale.getLanguage(),hidden);
 	}
 	/**
@@ -251,7 +254,7 @@ public abstract class Concept implements IConcept {
 		// be sure to have all stored languages in the language list
 		addLanguage(language);
 	}
-	public void addDescription(String label, Locale locale) {
+	public void addDescription(Locale locale, String label) {
 		addDescription(locale.getLanguage(), label);
 	}
 

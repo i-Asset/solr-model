@@ -27,6 +27,7 @@ public interface IPropertyType extends IConcept {
 	String BOOST_FIELD = "boost";
 	String RANGE_FIELD = "range";
 	String VALUE_QUALIFIER_FIELD = "valueQualifier";
+	String PROPERTY_USAGE_FIELD = "*_usage";
 	String CLASSIFICATION_CLASS_FIELD = "classificationClass";
 	String CLASSIFICATION_INSTANCE_FIELD = "forAsset";
 	/**
