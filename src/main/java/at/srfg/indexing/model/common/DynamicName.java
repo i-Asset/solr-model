@@ -21,8 +21,13 @@ public interface DynamicName {
 		
 	}
 	/**
-	 * Static Helper for creating dynamic field parts
+	 * Static Helper for creating dynamic field parts where
+	 * non alphanumeric characters are deleted and whitespaces are 
+	 * replaces with underscores. Finally, the value is formatted
+	 * in CamelCase format starting with lower case.
+	 * As an example, the text "<b>First Name</b>" results in in a valid indexing name "<code>firstName</code>". 
 	 * @param part
+	 * @see CaseFormat#LOWER_CAMEL
 	 * @return
 	 */
 	static String getDynamicFieldPart(String part) {

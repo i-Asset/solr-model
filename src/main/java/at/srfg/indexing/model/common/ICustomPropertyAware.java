@@ -1,16 +1,10 @@
 package at.srfg.indexing.model.common;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.solr.core.mapping.SolrDocument;
@@ -19,8 +13,43 @@ import org.springframework.data.solr.core.mapping.SolrDocument;
  * dynamic property is further qualified by key parts.
  * 
  * <p>
- * Implementors inherit default functionality for handling dynamic properties
+ * Implementors inherit default functionality for handling dynamic properties. They may
+ * then add custom properties with 
+ * <pre>
+ * addProperty(&lt;value&gt;, &lt;qualifier 1&gt;, ..., &lt;qualifier n&gt;)
+ * </pre>
+ * where the provided qualifiers are used to create the dynamic key part for the value. 
+ * The kvalue is indexed depending on its type in the following fields:
+ * <ul>
+ * <li>String {@link #CUSTOM_STRING_PROPERTY}
+ * <li>Integer {@link #CUSTOM_INTEGER_PROPERTY}
+ * <li>Double {@link #CUSTOM_DOUBLE_PROPERTY}
+ * <li>Boolean {@link #CUSTOM_BOOLEAN_PROPERTY}
+ * </ul>
+ * with the <code>key</code> as dynamic filed part. 
  * 
+ * The qualifiers are concatenated with @ as delimiter and stored in {@link #CUSTOM_KEY_FIELD}.
+ * The original qualifiers are also indexed in the {@link #CUSTOM_KEY_FIELD} for later retrieval:
+ * <pre>
+ * get&lt;type&gt;PropertyValues(&lt;qualifier 1&gt;, ..., &lt;qualifier n&gt;)
+ * </pre>
+ * will return again create the dynamic key an access the indexed values!
+ * </p>
+ * <p>
+ * A more concrete 
+ * example for indexing 
+ * <pre>
+ * addProperty(3.14, "Rotation", "Max")
+ * </pre>
+ * will first create the dynamic <code>key</code> (see {@link DynamicName#getDynamicFieldPart(String...)} for details) which 
+ * results in an eligible index field name part <code>rotation_max</code>. Since the provided value is a {@link Double} value, the resulting index field name will be
+ * <code>rotation_max_ds</code>.
+ * <br/>
+ * For Retrieval, appropriate methods distinguish the type to return:
+ * <pre>
+ * getDoublePropertyValues("Rotation", "Max")
+ * </pre>
+ * will provide the stored values from the index field named <code>rotation_max_ds</code>.
  * </p>
  * @author dglachs
  *
@@ -32,11 +61,20 @@ public interface ICustomPropertyAware {
 	 */
 	String CUSTOM_KEY_FIELD = "*_key";
 	/**
-	 * The custom string properties
+	 * The custom string properties field
 	 */
 	String CUSTOM_STRING_PROPERTY = "*_ss";
+	/**
+	 * The custom double properties field
+	 */
 	String CUSTOM_DOUBLE_PROPERTY = "*_ds";
+	/**
+	 * The custom integer properties field
+	 */
 	String CUSTOM_INTEGER_PROPERTY = "*_is";
+	/**
+	 * The custom boolean properties field
+	 */
 	String CUSTOM_BOOLEAN_PROPERTY = "*_b";
 	/**
 	 * Helper method to extract the collection
@@ -49,18 +87,6 @@ public interface ICustomPropertyAware {
 			return solrDocument.collection();
 		}
 		throw new IllegalStateException("No @SolrDocument annotation found ...");
-	}
-	/**
-	 * Manage the Dynamic Key parts and manage the original labeling 
-	 * in {@link ICustomPropertyAware#CUSTOM_KEY_FIELD}
-	 * @param parts
-	 * @return
-	 */
-	default String mapDynamicKeyParts(String ... parts) {
-		String key = DynamicName.getDynamicFieldPart(parts);
-		// use @ as delimiter
-		getCustomPropertyKeys().put(key, String.join("@", parts));
-		return key;
 	}
 
 	/**
@@ -78,20 +104,29 @@ public interface ICustomPropertyAware {
 	 * @param qualifier
 	 */
 	default void setProperty(Boolean value, PropertyType customMeta, String ...qualifier) {
-		String key = mapDynamicKeyParts(qualifier);
+		String key = DynamicName.getDynamicFieldPart(qualifier);
+		// use @ as delimiter and store the original qualifier
+		getCustomPropertyKeys().put(key, String.join("@", qualifier));
+		// store the value with the key
 		getCustomBooleanValue().put(key, value);
-		// handle the customMeta
+		// handle the customMeta with the key
 		getCustomProperties().put(key, customMeta);
 	}
 	
-	
+	/**
+	 * Setter for a customized numeric value
+	 * @param value The double value
+	 * @param qualifier The dynamic name parts
+	 */
 	default void addProperty(Double value, String ... qualifier) {
 		addProperty(value, null, qualifier);
 
 	}
 	default void addProperty(Double value, PropertyType customMeta, String ... qualifier) {
-		String key = mapDynamicKeyParts(qualifier);
-		
+		String key = DynamicName.getDynamicFieldPart(qualifier);
+		// use @ as delimiter and store the original qualifier
+		getCustomPropertyKeys().put(key, String.join("@", qualifier));
+		// store the value
 		Collection<Double> values = getCustomDoubleValues().get(key);
 		if ( values == null ) {
 			// use a set to avoid duplicates
@@ -104,14 +139,28 @@ public interface ICustomPropertyAware {
 			getCustomProperties().put(key, customMeta);
 		}
 	}
-	
+	/**
+	 * Add a integer value to the index. The value is stored in the {@link #CUSTOM_INTEGER_PROPERTY}
+	 * field where the dynamic part of the is constructed on behalf of the qualifier.   
+	 * @param value The integer value
+	 * @param qualifier The dynamic field parts
+	 * @see DynamicName#getDynamicFieldPart(String...)
+	 */
 	default void addProperty(Integer value, String ... qualifier) {
 		addProperty(value, null, qualifier);
 	}
-	
+	/**
+	 * Add a integer value to the index. The value is stored in the {@link #CUSTOM_INTEGER_PROPERTY}
+	 * field where the dynamic part of the is constructed on behalf of the qualifier.   
+	 * @param value The integer value to be added to the index
+	 * @param customMeta The custom property definition of the integer value
+	 * @param qualifier The dynamic field parts
+	 */
 	default void addProperty(Integer value, PropertyType customMeta, String ... qualifier) {
-		String key = mapDynamicKeyParts(qualifier);
-		
+		String key = DynamicName.getDynamicFieldPart(qualifier);
+		// use @ as delimiter and store the original qualifier
+		getCustomPropertyKeys().put(key, String.join("@", qualifier));
+		// store the value
 		Collection<Integer> values = getCustomIntValues().get(key);
 		if ( values == null ) {
 			// use a set to avoid duplicates
@@ -124,93 +173,20 @@ public interface ICustomPropertyAware {
 			getCustomProperties().put(key, customMeta);
 		}
 	}
-	/**
-	 * add a custom multilingual property to the index
-	 * @param text
-	 * @param locale
-	 * @param qualifier
-	 */
-	default void addMultiLingualProperty(String text, Locale locale, String ...qualifier ) {
-		addMultiLingualProperty(text, locale.getLanguage(), qualifier);
-	}
-	default void addMultiLingualProperty(String text, String lang, String ... qualifier) {
-		String key = mapDynamicKeyParts(qualifier);
-		Collection<String> values = getCustomStringValues().get(key);
-		if ( values == null ) {
-			getCustomStringValues().put(key,  new HashSet<String>());
-		}
-		// The value is finally stored with <text>@<lang>
-		getCustomStringValues().get(key).add(String.format("%s@%s", text, lang));
-	}
-	/**
-	 * Obtain a list of multilingual property values
-	 * @param qualifier The qualifier used when storing  the multi lingual property value
-	 * @param locale The language code, such as <i>en</i>, <i>es</i>
-	 * @return A list of multi lingual property values for the desired languag, empty list when no value present
-	 */
-	default List<String> getMultiLingualProperties(Locale locale, String ...qualifier ) {
-		return getMultiLingualProperties(locale.getLanguage(), qualifier);
-	}
-	default Optional<String> getMultiLingualProperty(Locale locale, String ...qualifier ) {
-		return getMultiLingualProperty(locale.getLanguage(), qualifier);
-	}
-	/**
-	 * Obtain a single multilingual property value
-	 * @param language
-	 * @param qualifier
-	 * @return
-	 */
-	default Optional<String> getMultiLingualProperty(String language, String ...qualifier ) {
-		Collection<String> v = getMultiLingualProperties(language, qualifier);
-		if ( v!=null ) {
-			return v.stream().findFirst();
-		}
-		return Optional.empty();
-		
-	}
-	default List<String> getMultiLingualProperties(String language, String ... qualifier) {
-		String key = mapDynamicKeyParts(qualifier);
-		Collection<String> values = getCustomStringValues().get(key);
-		if ( values != null && ! values.isEmpty() ) {
-			return values.stream().filter(new Predicate<String>() {
-				private String extractLanguage(String t) {
-					int delim = t.lastIndexOf("@");
-					if ( delim > 0 ) {
-						return t.substring(delim+1);
-					}
-					return t;
-				}
-				@Override
-				public boolean test(String t) {
-					if ( language.equals(extractLanguage(t))) {
-						return true;
-					}
-					return false;
-				}})
-			.map(new Function<String, String>() {
-				private String extractValue(String t) {
-					int delim = t.lastIndexOf("@");
-					if ( delim > 0 && t.length()>delim+1) {
-						return t.substring(0,delim);
-					}
-					return null;
-				}
-				@Override
-				public String apply(String t) {
-					return extractValue(t);
-				}})
-			.collect(Collectors.toList());
-		}
-
-		return new ArrayList<>();
-	}
 	default void addProperty(String value, String ... qualifier) {
-		addProperty(value, null, qualifier);
+		addProperty(value, (PropertyType)null, qualifier);
 	}
-	
+	/**
+	 * Add a text property to the index
+	 * @param value the text value
+	 * @param customMeta The property metadata or null
+	 * @param qualifier the qualifier for storing in the index
+	 */
 	default void addProperty(String value, PropertyType customMeta, String ... qualifier) {
-		String key = mapDynamicKeyParts(qualifier);
-		
+		String key = DynamicName.getDynamicFieldPart(qualifier);
+		// use @ as delimiter and store the original qualifier
+		getCustomPropertyKeys().put(key, String.join("@", qualifier));
+		// store the value
 		Collection<String> values = getCustomStringValues().get(key);
 		if ( values == null ) {
 			// use a set to avoid duplicates
@@ -230,7 +206,9 @@ public interface ICustomPropertyAware {
 	 * @param qualifier
 	 */
 	default void setProperty(String value, String ...qualifier ) {
-		String key = mapDynamicKeyParts(qualifier);
+		String key = DynamicName.getDynamicFieldPart(qualifier);
+		// use @ as delimiter and store the original qualifier
+		getCustomPropertyKeys().put(key, String.join("@", qualifier));
 		// single value, override any existing value
 		getCustomStringValues().put(key, Collections.singleton(value));
 	}
@@ -240,12 +218,20 @@ public interface ICustomPropertyAware {
 	 * @return
 	 */
 	default Collection<String> getStringPropertyValues(String ... qualifier) {
-		String key = mapDynamicKeyParts(qualifier);
+		String key = DynamicName.getDynamicFieldPart(qualifier);
 		return getCustomStringValues().get(key);
 		
 	}
+	/**
+	 * Setter for the string property values
+	 * @param values
+	 * @param qualifier The dynamic field part
+	 */
 	default void setStringPropertyValues(Collection<String> values, String ...qualifier ) {
-		String key = mapDynamicKeyParts(qualifier);
+		String key = DynamicName.getDynamicFieldPart(qualifier);
+		// use @ as delimiter and store the original qualifier
+		getCustomPropertyKeys().put(key, String.join("@", qualifier));
+		// store the collection
 		getCustomStringValues().put(key, values);
 	}
 	default Optional<String> getStringPropertyValue(String ...qualifier) {
@@ -256,15 +242,16 @@ public interface ICustomPropertyAware {
 		return Optional.empty();
 	}
 	default Collection<Double> getDoublePropertyValues(String ... qualifier) {
-		String key = mapDynamicKeyParts(qualifier);
+		String key = DynamicName.getDynamicFieldPart(qualifier);
 		return getCustomDoubleValues().get(key);
 	}
-	default <T> Collection<T> getProperty(Class<T> clazz, String ... qualifier) {
-		Collection<T> values = new ArrayList<T>();
-		return values;
-	}
+	/**
+	 * Retrieve the integer values for the provided qualifiers
+	 * @param qualifier The dynamic name parts
+	 * @return
+	 */
 	default Collection<Integer> getIntPropertyValues(String ... qualifier) {
-		String key = mapDynamicKeyParts(qualifier);
+		String key = DynamicName.getDynamicFieldPart(qualifier);
 		return getCustomIntValues().get(key);
 	}
 	/**
