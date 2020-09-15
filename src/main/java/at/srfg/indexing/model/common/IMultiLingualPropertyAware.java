@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -20,21 +19,17 @@ import java.util.stream.Collectors;
  * @see ICustomPropertyAware
  */
 public interface IMultiLingualPropertyAware extends ICustomPropertyAware {
+	String MULTILANG_DELIM = "@";
+	
 	/**
 	 * Add a new multilingual text property to the index. 
 	 * 
 	 */
 	default void addMultiLingualProperty(String text, String lang, String ... qualifier) {
-		String key = DynamicName.getDynamicFieldPart(qualifier);
-		// use @ as delimiter and store the original qualifier
-		getCustomPropertyKeys().put(key, String.join("@", qualifier));
-		// store the value
-		Collection<String> values = getCustomStringValues().get(key);
-		if ( values == null ) {
-			getCustomStringValues().put(key,  new HashSet<String>());
-		}
-		// The value is finally stored with <text>@<lang>
-		getCustomStringValues().get(key).add(String.format("%s@%s", text, lang));
+		addProperty(String.format("%s%s%s", text, MULTILANG_DELIM, lang), qualifier);
+	}
+	default void addMultiLingualProperty(String text, String lang, PropertyType meta, String ...qualifier ) {
+		addProperty(String.format("%s%s%s", text, MULTILANG_DELIM, lang), meta, qualifier);
 	}
 	/**
 	 * add a custom multilingual property to the index
@@ -45,6 +40,9 @@ public interface IMultiLingualPropertyAware extends ICustomPropertyAware {
 	default void addMultiLingualProperty(String text, Locale locale, String ...qualifier ) {
 		addMultiLingualProperty(text, locale.getLanguage(), qualifier);
 	}
+	default void addMultiLingualProperty(String text, Locale locale, PropertyType meta, String ...qualifier ) {
+		addMultiLingualProperty(text, locale.getLanguage(), meta, qualifier);
+	}
 	/**
 	 * Obtain a list of multilingual property values
 	 * @param qualifier The qualifier used when storing  the multi lingual property value
@@ -54,6 +52,12 @@ public interface IMultiLingualPropertyAware extends ICustomPropertyAware {
 	default List<String> getMultiLingualProperties(Locale locale, String ...qualifier ) {
 		return getMultiLingualProperties(locale.getLanguage(), qualifier);
 	}
+	/**
+	 * Obtain the first value of the requested language (assuming there is only one value per language)
+	 * @param locale
+	 * @param qualifier
+	 * @return
+	 */
 	default Optional<String> getMultiLingualProperty(Locale locale, String ...qualifier ) {
 		return getMultiLingualProperty(locale.getLanguage(), qualifier);
 	}
