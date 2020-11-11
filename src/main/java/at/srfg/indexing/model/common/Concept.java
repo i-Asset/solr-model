@@ -171,7 +171,7 @@ public abstract class Concept implements IConcept {
 		addLanguage(language);
 	}
 	public void addAlternateLabel(Locale locale, String alternate) {
-		addHiddenLabel(locale.getLanguage(),alternate);
+		addAlternateLabel(locale.getLanguage(),alternate);
 	}
 	public void addHiddenLabel(Locale locale, String hidden) {
 		addHiddenLabel(locale.getLanguage(),hidden);
